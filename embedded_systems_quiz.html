@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Embedded Systems Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161d;
+    --bg3: #1a1e28;
+    --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(255,255,255,0.14);
+    --accent: #5cffb0;
+    --accent-dim: rgba(92,255,176,0.12);
+    --accent-mid: rgba(92,255,176,0.25);
+    --danger: #ff5c7a;
+    --danger-dim: rgba(255,92,122,0.12);
+    --text-1: #f0f2f7;
+    --text-2: #8b909e;
+    --text-3: #555b6b;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --display: 'Syne', sans-serif;
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+
+  html { font-size: 16px; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-1);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem 4rem;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Background grid decoration */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(92,255,176,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(92,255,176,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(92,255,176,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 680px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    animation: fadeDown 0.5s ease both;
+  }
+
+  .site-header .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .site-header h1 {
+    font-family: var(--display);
+    font-size: clamp(28px, 6vw, 42px);
+    font-weight: 800;
+    color: var(--text-1);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .site-header h1 span {
+    color: var(--accent);
+  }
+
+  .site-header p {
+    font-size: 14px;
+    color: var(--text-2);
+    margin-top: 10px;
+    font-weight: 300;
+  }
+
+  /* ── Start screen ── */
+  #start-screen {
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .mode-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mode-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent-dim);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .mode-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+  .mode-card:hover::before { opacity: 1; }
+
+  .mode-card.active {
+    border-color: var(--accent);
+    background: var(--bg3);
+  }
+
+  .mode-card.active::before { opacity: 1; }
+
+  .mode-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .mode-title {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-1);
+    margin-bottom: 4px;
+  }
+
+  .mode-desc {
+    font-size: 12px;
+    color: var(--text-2);
+  }
+
+  .mode-card.active .mode-title { color: var(--accent); }
+
+  .start-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--accent);
+    color: #0d0f14;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: opacity 0.2s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .start-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.15);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .start-btn:hover { transform: translateY(-1px); }
+  .start-btn:hover::after { opacity: 1; }
+  .start-btn:active { transform: scale(0.99); }
+
+  /* ── Quiz screen ── */
+  #quiz-screen { display: none; }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    animation: fadeDown 0.3s ease both;
+  }
+
+  .q-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-3);
+    letter-spacing: 0.08em;
+  }
+
+  .score-badge {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 4px 12px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(92,255,176,0.2);
+    border-radius: 99px;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    height: 3px;
+    background: var(--bg3);
+    border-radius: 99px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    animation: fadeDown 0.3s ease both 0.05s;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 0 8px rgba(92,255,176,0.5);
+  }
+
+  /* Question card */
+  .q-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .q-number {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .q-text {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-1);
+    line-height: 1.45;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  /* Options */
+  .options { display: flex; flex-direction: column; gap: 8px; }
+
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 13px 16px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-1);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    width: 100%;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--border-hover);
+    background: #1e2230;
+    transform: translateX(2px);
+  }
+
+  .option-btn:disabled { cursor: default; }
+
+  .opt-key {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    min-width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text-3);
+    background: var(--bg2);
+    flex-shrink: 0;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    margin-top: 1px;
+  }
+
+  .option-btn:hover:not(:disabled) .opt-key {
+    border-color: var(--border-hover);
+    color: var(--text-2);
+  }
+
+  .option-btn.correct {
+    background: rgba(92,255,176,0.08);
+    border-color: rgba(92,255,176,0.4);
+  }
+
+  .option-btn.correct .opt-key {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0d0f14;
+  }
+
+  .option-btn.correct .opt-text { color: var(--accent); }
+
+  .option-btn.wrong {
+    background: rgba(255,92,122,0.08);
+    border-color: rgba(255,92,122,0.4);
+  }
+
+  .option-btn.wrong .opt-key {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #0d0f14;
+  }
+
+  .option-btn.wrong .opt-text { color: var(--danger); }
+
+  /* Feedback */
+  .feedback {
+    margin-top: 1rem;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: var(--mono);
+    display: none;
+  }
+
+  .feedback.show { display: block; }
+
+  .feedback.correct {
+    background: rgba(92,255,176,0.08);
+    border: 1px solid rgba(92,255,176,0.2);
+    color: var(--accent);
+  }
+
+  .feedback.wrong {
+    background: rgba(255,92,122,0.08);
+    border: 1px solid rgba(255,92,122,0.2);
+    color: var(--danger);
+  }
+
+  /* Navigation */
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    animation: fadeUp 0.3s ease both 0.1s;
+  }
+
+  .nav-btn {
+    flex: 1;
+    padding: 12px 20px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-1);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s, opacity 0.2s;
+  }
+
+  .nav-btn:hover:not(:disabled) {
+    border-color: var(--border-hover);
+    background: var(--bg3);
+    transform: translateY(-1px);
+  }
+
+  .nav-btn:active:not(:disabled) { transform: scale(0.99); }
+
+  .nav-btn:disabled { opacity: 0.28; cursor: not-allowed; }
+
+  .nav-btn.primary {
+    background: var(--accent-dim);
+    border-color: rgba(92,255,176,0.25);
+    color: var(--accent);
+  }
+
+  .nav-btn.primary:hover:not(:disabled) {
+    background: rgba(92,255,176,0.18);
+    border-color: rgba(92,255,176,0.4);
+  }
+
+  /* ── Results screen ── */
+  #results-screen { display: none; animation: fadeUp 0.4s ease both; }
+
+  .results-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .results-card::before {
+    content: '';
+    position: absolute;
+    bottom: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(92,255,176,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .result-grade {
+    font-family: var(--display);
+    font-size: 80px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .result-pct {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-2);
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.06em;
+  }
+
+  .result-msg {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-1);
+    margin-bottom: 0.4rem;
+  }
+
+  .result-sub {
+    font-size: 14px;
+    color: var(--text-2);
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 2rem;
+  }
+
+  .stat-box {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 10px;
+  }
+
+  .stat-val {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .stat-val.good { color: var(--accent); }
+  .stat-val.bad { color: var(--danger); }
+  .stat-val.neutral { color: var(--text-1); }
+
+  .stat-lbl {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .results-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .results-actions .nav-btn {
+    font-family: var(--display);
+    font-weight: 600;
+  }
+
+  .results-actions .nav-btn.primary {
+    font-size: 15px;
+    padding: 14px;
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 500px) {
+    .mode-grid { grid-template-columns: 1fr; }
+    .q-text { font-size: 16px; }
+    .result-grade { font-size: 64px; }
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="eyebrow">UTM · Embedded Systems</div>
+    <h1>Systems <span>Quiz</span></h1>
+    <p>Test your knowledge across sensors, actuators, control, communication &amp; more</p>
+  </header>
+
+  <!-- Start screen -->
+  <div id="start-screen">
+    <div class="mode-grid">
+      <div class="mode-card active" data-mode="all" onclick="setMode(this,'all')">
+        <div class="mode-icon">📚</div>
+        <div class="mode-title">Full</div>
+        <div class="mode-desc">All 100 questions</div>
+      </div>
+      <div class="mode-card" data-mode="25" onclick="setMode(this,'25')">
+        <div class="mode-icon">⚡</div>
+        <div class="mode-title">Medium</div>
+        <div class="mode-desc">25 questions</div>
+      </div>
+      <div class="mode-card" data-mode="10" onclick="setMode(this,'10')">
+        <div class="mode-icon">🎯</div>
+        <div class="mode-title">Quick</div>
+        <div class="mode-desc">10 questions</div>
+      </div>
+    </div>
+    <button class="start-btn" onclick="startQuiz()">Start Quiz →</button>
+  </div>
+
+  <!-- Quiz screen -->
+  <div id="quiz-screen">
+    <div class="top-bar">
+      <span class="q-label" id="q-label">Question 1 / 100</span>
+      <span class="score-badge" id="score-badge">Score: 0</span>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="q-card">
+      <div class="q-number" id="q-number">Q01</div>
+      <div class="q-text" id="q-text"></div>
+      <div class="options" id="options"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" id="btn-prev" onclick="prevQ()">← Prev</button>
+      <button class="nav-btn primary" id="btn-next" onclick="nextQ()" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- Results screen -->
+  <div id="results-screen">
+    <div class="results-card">
+      <div class="result-grade" id="result-grade">–</div>
+      <div class="result-pct" id="result-pct"></div>
+      <div class="result-msg" id="result-msg"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-val good" id="stat-correct">0</div>
+          <div class="stat-lbl">Correct</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val bad" id="stat-wrong">0</div>
+          <div class="stat-lbl">Wrong</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val neutral" id="stat-total">0</div>
+          <div class="stat-lbl">Total</div>
+        </div>
+      </div>
+    </div>
+    <div class="results-actions">
+      <button class="nav-btn" onclick="showStart()">Change mode</button>
+      <button class="nav-btn primary" onclick="startQuiz()">Try again →</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ALL_QUESTIONS = [
+  {q:"What are the three main interaction types in embedded systems?",opts:["User, Environment, Device (IoT)","Digital, Analog, Binary","Local, Global, Cloud","Sensor, Actuator, Controller"],a:0},
+  {q:"A button and a single LED represent which kind of binary interface?",opts:["4x4 keypad","1x1 key and 1x1 pixel","LCD matrix","Resistive touch sensor"],a:1},
+  {q:"In a 4x4 keypad, how are rows and columns organized?",opts:["4 rows, 4 columns, 8 pins total","8 rows, 8 columns, 64 pins","Row 0..3 and Column 0..3","Only rows are used for reading keys"],a:2},
+  {q:"What type of touch sensor is built with two conductive layers separated by spacers?",opts:["Capacitive touch sensor","Resistive touch sensor","Infrared touch sensor","Surface acoustic wave sensor"],a:1},
+  {q:"Which interaction method uses a head-mounted display to immerse the user in a virtual environment?",opts:["Augmented Reality","Virtual Reality","Visual Interaction – Kinect","Voice Interaction"],a:1},
+  {q:"Which technology overlays digital information onto the real world?",opts:["Virtual Reality","Augmented Reality","EEG interface","Wii Remote"],a:1},
+  {q:"The Wii controller is an example of which type of interaction?",opts:["Voice interaction","Visual interaction","Binary interface","RF communication"],a:1},
+  {q:"What does the EEG-based human-machine interface measure?",opts:["Muscle movement","Brain electrical activity","Eye blinking","Heart rate"],a:1},
+  {q:"Which library function redirects stdin/stdout to custom hardware in Arduino?",opts:["Serial.begin()","fdevopen()","pinMode()","digitalWrite()"],a:1},
+  {q:"In the STDIO button/LED example, what character is returned by GetButton when pressed?",opts:["'0'","'1'","'A'","'x'"],a:1},
+  {q:"What is the main advantage of using STDIO with custom hardware streams?",opts:["Faster execution","Same printf/scanf can be used for different I/O devices","Lower memory usage","Better power management"],a:1},
+  {q:"An operating system in embedded context manages which resources?",opts:["Only memory","Memory, peripherals, and processing time","Only peripherals and memory","Network and display only"],a:1},
+  {q:"The simplest software structure for an embedded application is:",opts:["Multi-tasking with interrupts","Spin-lock sequential execution","Single-process infinite loop","Timer interrupt based scheduler"],a:2},
+  {q:"What is a major drawback of the 'spin-lock' method for multi-tasking?",opts:["Complex debugging","CPU load 100% all the time","Requires an RTOS","Cannot handle analog inputs"],a:1},
+  {q:"In timer-interrupt-based multi-tasking, tasks are executed:",opts:["Only when an external button is pressed","Periodically, based on a recurrence time and offset","As fast as possible in a loop","Randomly by the compiler"],a:1},
+  {q:"A task has REC = 3 ms and OFST = 3 ms. What does this mean?",opts:["Runs every 3 ms from power-up","Runs every 3 ms, first at 3 ms after start","Runs once after 3 ms","Never runs"],a:1},
+  {q:"In the timer ISR example, the task executes when the recurrence counter becomes:",opts:["Equal to zero","Less than or equal to zero","Greater than the offset","Equal to REC"],a:1},
+  {q:"What is a sensor in embedded systems?",opts:["A component that converts electrical energy to motion","Totality of components that transform a physical quantity into an internal signal","A device that only measures temperature","A microcontroller"],a:1},
+  {q:"The component that converts a measurable physical value into an electrical signal is called:",opts:["Actuator","Transducer","Controller","H-bridge"],a:1},
+  {q:"A sensor that provides only ON/OFF states belongs to which interface classification?",opts:["Analog","Digital","Binary","Timing"],a:2},
+  {q:"A sensor output that varies continuously in voltage (e.g. 0–5V) is classified as:",opts:["Binary","Digital","Analog","Time-based"],a:2},
+  {q:"An ultrasonic distance sensor outputting a pulse width proportional to distance uses which interface?",opts:["Binary","Analog","Digital (serial)","Timing"],a:3},
+  {q:"A sensor that measures a parameter inside the system (e.g. CPU temperature) is called:",opts:["Exteroceptive","Global","Enteroceptive","Active"],a:2},
+  {q:"A GPS sensor that provides global location is an example of:",opts:["Local sensor","Global sensor","Passive sensor","Binary sensor"],a:1},
+  {q:"What does an amplifier do in hardware signal conditioning?",opts:["Divides the signal amplitude","Multiplies the signal amplitude","Cuts the signal at a limit","Filters noise only"],a:1},
+  {q:"In hardware conditioning, 'saturate' means:",opts:["Amplify the signal linearly","Cut the signal at a maximum or minimum level","Convert analog to digital","Remove high-frequency noise"],a:1},
+  {q:"A low-pass filter is used to:",opts:["Remove low-frequency noise","Smooth the signal by attenuating high frequencies","Amplify the signal","Detect only binary transitions"],a:1},
+  {q:"The Arduino constrain(x, min, max) function performs:",opts:["Weighted average filtering","Linear conversion","Signal saturation (clamping)","Median filtering"],a:2},
+  {q:"A median filter is effective against which type of noise?",opts:["Gaussian white noise","Salt and pepper noise","Low-frequency drift","Quantisation noise"],a:1},
+  {q:"A weighted average filter is a type of:",opts:["High-pass filter","Low-pass (smoothing) filter","Median filter","Non-linear conversion"],a:1},
+  {q:"The formula (x−x1)/(x2−x1) = (y−y1)/(y2−y1) represents:",opts:["Saturation","Linear conversion (mapping) between two ranges","Median filtering","Digital integration"],a:1},
+  {q:"A virtual sensor:",opts:["Is a physical sensor without wires","Computes a measurement from other sensor signals using a model","Only works in simulation","Has no software component"],a:1},
+  {q:"In the 3-DOF robotic arm example, the end effector position is derived from:",opts:["Only motor currents","Joint angles (β, γ, δ) and link lengths","PWM duty cycles","Encoder counts only"],a:1},
+  {q:"An actuator in an embedded system:",opts:["Measures temperature","Converts internal electrical signal into a physical action","Only controls LEDs","Performs digital communication"],a:1},
+  {q:"The interface of a simple DC motor controlled only ON/OFF is:",opts:["Analog","Digital (PWM)","Binary","Timing"],a:2},
+  {q:"A servo motor receiving a PWM signal with varying pulse width uses which interface?",opts:["Binary","Analog","Time based","Serial data"],a:2},
+  {q:"A stepper motor typically uses which type of electrical connection?",opts:["Single transistor","H-bridge","Relay only","Direct microcontroller pin"],a:1},
+  {q:"In a unipolar stepper motor, the current in each coil:",opts:["Flows in both directions","Always flows in one direction","Is sinusoidal","Is not used"],a:1},
+  {q:"Which power conversion device uses an electromagnet to mechanically switch contacts?",opts:["Transistor","Relay","H-bridge","Op-amp"],a:1},
+  {q:"In a transistor used as a switch, power dissipation is minimized because:",opts:["The transistor is always in active region","Either voltage is nearly zero or current is nearly zero","It operates only at high frequency","It has a heat sink"],a:1},
+  {q:"An H-bridge allows:",opts:["Analog voltage amplification","Reversing the direction of current through a motor","Only ON/OFF control of a motor","Measuring motor speed"],a:1},
+  {q:"For a BLDC motor, the power stage typically uses:",opts:["A single relay","A three-phase H-bridge (inverter)","A single transistor","A diode bridge"],a:1},
+  {q:"Diagnosis in embedded systems is:",opts:["The process of fixing a bug in code","Identification of the nature and cause of a phenomenon","Only hardware testing","Communication protocol checking"],a:1},
+  {q:"Threshold symptom detection compares:",opts:["The signal with two other signals","The signal value with a preset value (over/under)","The signal over a long time","Only digital values"],a:1},
+  {q:"Range symptom detection checks if a signal is:",opts:["Exactly equal to a threshold","Between two preset limits","Pulsed","Digital or analog"],a:1},
+  {q:"Plausibility diagnosis relies on:",opts:["A single sensor","Comparing the same parameter from two or more sensors/methods","Only external inputs","User feedback"],a:1},
+  {q:"'Stall in range' diagnosis detects:",opts:["Over-voltage","No variation in the signal over time (signal stuck)","High frequency noise","Open circuit only"],a:1},
+  {q:"A binary (anti-bouncing) filter is used for:",opts:["Smoothing analog signals","Qualifying a diagnosis by requiring the symptom to persist for a certain time","Filtering high-frequency noise","Communication error detection"],a:1},
+  {q:"Which reaction to a qualified diagnosis means ignoring the symptom for a while?",opts:["Blocking","Derating","Inhibition","Information"],a:2},
+  {q:"Derating as a reaction means:",opts:["Turning off the system","Limiting functionality (e.g. reducing power) during the diagnosis","Sending a message","Restarting the device"],a:1},
+  {q:"Protection by parameter trajectory control considers not only position but also:",opts:["Temperature","Speed, acceleration, and jerk","Voltage levels","Network latency"],a:1},
+  {q:"In open-loop control, the output is determined:",opts:["Using feedback from a sensor","Based on a predefined relationship without measuring the controlled variable","By a PID algorithm","Only by user input"],a:1},
+  {q:"On-Off control with hysteresis adds:",opts:["A derivative term","A dead band to prevent rapid switching around the setpoint","An integral term","Communication capability"],a:1},
+  {q:"Which term in a PID controller is proportional to accumulated error over time?",opts:["Proportional (P)","Integral (I)","Derivative (D)","Feed-forward"],a:1},
+  {q:"After setting Kp to half the oscillation value, what do you increase next in PID tuning?",opts:["Ki","Kd (increase by 5-10%)","The setpoint","The sampling time"],a:1},
+  {q:"Evolution (position) control typically uses:",opts:["Only bang-bang control","A predefined profile (trajectory) of speed/acceleration to reach a position","Open-loop only","Only relay outputs"],a:1},
+  {q:"In communication theory, the 'channel' is:",opts:["The message content","The medium through which the message travels","The receiver","The software protocol"],a:1},
+  {q:"In serial communication, data is sent:",opts:["All bits simultaneously on multiple wires","One bit at a time over a single line","Only wirelessly","As parallel bytes"],a:1},
+  {q:"SPI is a ________ protocol.",opts:["Asynchronous serial","Synchronous serial (master-slave)","Parallel","Analog"],a:1},
+  {q:"In SPI, the slave select (SS) pin:",opts:["Supplies clock","Selects which slave device communicates with the master","Carries the data","Is not needed"],a:1},
+  {q:"I2C uses how many wires (excluding power/ground)?",opts:["1","2 (SDA, SCL)","4","8"],a:1},
+  {q:"In a UART frame, the start bit is always:",opts:["Logic 1","Logic 0","The same as parity","1.5 bits long"],a:1},
+  {q:"What is the idle state of a UART line?",opts:["Logic 0","Logic 1","High impedance","Alternating 0 and 1"],a:1},
+  {q:"A program interpreter:",opts:["Compiles code to machine language before execution","Reads and executes source code line-by-line","Always requires an RTOS","Only works with assembly language"],a:1},
+  {q:"MicroPython on a microcontroller is an example of:",opts:["An executed (compiled) program","An interpreted program","A binary interface","A PID controller"],a:1},
+  {q:"G-code is commonly used to control:",opts:["Voice assistants","3D printers and CNC machines","Wireless communication","Temperature sensors"],a:1},
+  {q:"Morse code interpreter converts:",opts:["Analog signals to PWM","Short and long pulses (dots/dashes) into characters","Temperature to digital","Voice to text"],a:1},
+  {q:"Fuzzy logic differs from classical logic by using:",opts:["Only 0 and 1","Continuous truth values between 0 and 1","Binary integers","No rules"],a:1},
+  {q:"The process of converting a crisp input value into a fuzzy set is called:",opts:["Defuzzification","Fuzzification","Rule evaluation","Aggregation"],a:1},
+  {q:"In the knowledge base, a fuzzy rule typically has the form:",opts:["IF condition THEN action","WHILE condition DO action","INPUT variable, OUTPUT variable","SET variable = value"],a:0},
+  {q:"The final step converting a fuzzy output set back to a crisp control value is:",opts:["Fuzzification","Aggregation","Defuzzification","Activation"],a:2},
+  {q:"Which is a typical application of fuzzy control?",opts:["SPI communication","Washing machines","H-bridge design","Relay driving"],a:1},
+  {q:"A Finite State Machine (FSM) consists of:",opts:["PID constants and setpoint","A finite number of states, transitions, and actions","An analog sensor array","A wireless protocol"],a:1},
+  {q:"In a Moore FSM, the outputs depend on:",opts:["Both the current state and the inputs","Only the current state","Only the inputs","The next state only"],a:1},
+  {q:"In a Mealy FSM, the outputs are a function of:",opts:["Only the current state","The current state and the inputs","The previous state only","The clock signal"],a:1},
+  {q:"In Moore FSM evaluation, which step is performed first in the loop?",opts:["Input gathering","Output evaluation based on current state","Next state calculation","Delay for state time"],a:1},
+  {q:"In the traffic light FSM example, state 'goN' means:",opts:["North-south green","East-west green","All red","Yellow flashing"],a:0},
+  {q:"The traffic light FSM table uses input values 0 to 3 to represent:",opts:["Four different sensors","A 2-bit input pattern (e.g. car presence)","Timer values","LED brightness levels"],a:1},
+  {q:"In the line follower FSM, the output is a 2-bit value controlling:",opts:["LCD backlight","Left and right motor directions","Buzzer frequency","Serial data"],a:1},
+  {q:"The line follower FSM has three states. Which drives both motors forward?",opts:["Center","Left","Right","None"],a:0},
+  {q:"The 'Layered Architecture' in sensor/actuator systems is used to:",opts:["Increase power consumption","Separate hardware abstraction, signal processing, and application logic","Combine all code in one function","Eliminate the need for drivers"],a:1},
+  {q:"In the signal conditioning flow, 'virtual sensor' belongs to which layer?",opts:["Hardware abstraction layer","Signal processing / application layer (higher level)","Physical wiring","Power stage"],a:1},
+  {q:"Which is an example of an actuator for pressure control?",opts:["LED","Valve or pump","Thermistor","Microphone"],a:1},
+  {q:"The 'Ideal Mechanical Advantage' (IMA) concept relates to:",opts:["Electrical filtering","The mechanical transformation in a sensor mechanism","Communication baud rate","PWM frequency"],a:1},
+  {q:"A relay provides what key property between control and power circuits?",opts:["Amplification","Electrical isolation","Digital communication","PID control"],a:1},
+  {q:"In the transistor analogy, the base current controls:",opts:["The emitter-base voltage","A larger collector current (amplification)","The switching frequency","The power supply voltage"],a:1},
+  {q:"Main heat generation in a linear-mode transistor occurs because:",opts:["It is fully off","There is simultaneous voltage drop and current flow","It operates in saturation","It switches at high frequency"],a:1},
+  {q:"In power conversion, commutation (switching) avoids high dissipation because:",opts:["The transistor is always in the active region","The transistor is either fully off (I=0) or fully on (V≈0)","It uses a heat sink","It uses AC power only"],a:1},
+  {q:"A bipolar stepper motor driver requires an H-bridge that can:",opts:["Only sink current","Reverse current direction in each coil","Work without any microcontroller","Use only one power supply"],a:1},
+  {q:"Diagnosis qualification uses a binary filter (anti-bouncing) to:",opts:["Convert analog to digital","Ensure a symptom persists for a minimum time before accepted","Remove offset error","Calculate PID values"],a:1},
+  {q:"'Out of range protection' checks:",opts:["The communication baud rate","The value before applying it, clamping if needed","Only internal temperature","Program memory usage"],a:1},
+  {q:"In PID tuning, the first step after setting desired value is:",opts:["Increase Ki until oscillation","Set Kp/Ki/Kd to 0, increase Kp until oscillation and halve it","Set Kd to maximum","Use trial and error with all three"],a:1},
+  {q:"The sampling time Δt in PID discrete equations appears in:",opts:["Only the proportional term","The integral and derivative terms","Only the derivative term","It is not used"],a:1},
+  {q:"In 2WD platform control, differential steering is used to:",opts:["Change motor voltage","Control robot orientation by varying left and right wheel speeds","Communicate via I2C","Measure battery level"],a:1},
+  {q:"The communication environment 'transmission media' includes:",opts:["Only copper wires","Guided media (cables) and unguided media (wireless)","Only fiber optics","Only infrared"],a:1},
+  {q:"A SW protocol defines:",opts:["The physical voltage levels","The structure of the message and rules for exchange","The connector type","Only the baud rate"],a:1},
+  {q:"In the USART protocol, parity is used for:",opts:["Increasing speed","Simple error detection","Addressing multiple slaves","Frame synchronization"],a:1},
+  {q:"In Morse code, a 'dash' is typically how many times longer than a 'dot'?",opts:["Same length","Three times","Ten times","It varies randomly"],a:1},
+  {q:"The 'Gamer' experiment and TEDx mind interaction refer to:",opts:["New communication protocols","Brain-computer interfaces and thought-controlled games","Augmented reality glasses","Voice-only user interfaces"],a:1},
+  {q:"In embedded systems, a 'signal' is defined as:",opts:["A Wi-Fi connection","The evolution of information in time","A hardware interrupt","A power supply"],a:1}
+];
+
+let selectedMode = 'all';
+let questions = [];
+let current = 0;
+let answered = null;
+let score = 0;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function setMode(el, mode) {
+  selectedMode = mode;
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function show(id) {
+  ['start-screen','quiz-screen','results-screen'].forEach(s=>{
+    document.getElementById(s).style.display = 'none';
+  });
+  document.getElementById(id).style.display = 'block';
+}
+
+function showStart() {
+  show('start-screen');
+}
+
+function startQuiz() {
+  const count = selectedMode==='10'?10:selectedMode==='25'?25:100;
+  questions = shuffle(ALL_QUESTIONS).slice(0,count).map(q=>({
+    ...q,
+    opts: q.opts.map((o,i)=>({text:o,orig:i}))
+  }));
+  current = 0; answered = null; score = 0;
+  show('quiz-screen');
+  renderQ();
+}
+
+function renderQ() {
+  const q = questions[current];
+  const total = questions.length;
+
+  document.getElementById('q-label').textContent = `Question ${current+1} / ${total}`;
+  document.getElementById('score-badge').textContent = `Score: ${score}`;
+  document.getElementById('progress-fill').style.width = `${(current/total)*100}%`;
+  document.getElementById('q-number').textContent = `Q${String(current+1).padStart(2,'0')}`;
+  document.getElementById('q-text').textContent = q.q;
+
+  const opts = document.getElementById('options');
+  const keys = ['A','B','C','D'];
+  opts.innerHTML = q.opts.map((opt,i)=>`
+    <button class="option-btn" onclick="answer(${i})">
+      <span class="opt-key">${keys[i]}</span>
+      <span class="opt-text">${opt.text}</span>
+    </button>
+  `).join('');
+
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('feedback').textContent = '';
+
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  btnPrev.disabled = current === 0;
+  btnNext.disabled = true;
+  btnNext.textContent = current === total-1 ? 'Finish ✓' : 'Next →';
+  answered = null;
+}
+
+function answer(i) {
+  if(answered !== null) return;
+  answered = i;
+  const q = questions[current];
+  const isCorrect = q.opts[i].orig === q.a;
+  if(isCorrect) score++;
+
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((btn, idx) => {
+    btn.disabled = true;
+    if(q.opts[idx].orig === q.a) btn.classList.add('correct');
+    else if(idx === i) btn.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.className = `feedback show ${isCorrect ? 'correct' : 'wrong'}`;
+  fb.textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect — the correct answer is highlighted.';
+
+  document.getElementById('btn-next').disabled = false;
+  document.getElementById('score-badge').textContent = `Score: ${score}`;
+}
+
+function nextQ() {
+  if(answered === null) return;
+  if(current === questions.length - 1) { showResults(); return; }
+  current++;
+  answered = null;
+  renderQ();
+}
+
+function prevQ() {
+  if(current === 0) return;
+  current--;
+  answered = null;
+  renderQ();
+}
+
+function showResults() {
+  const total = questions.length;
+  const pct = Math.round((score/total)*100);
+  let grade, msg;
+  if(pct>=90){grade='A';msg='Outstanding!';}
+  else if(pct>=75){grade='B';msg='Great work!';}
+  else if(pct>=60){grade='C';msg='Good effort!';}
+  else if(pct>=40){grade='D';msg='Keep studying!';}
+  else{grade='F';msg='Back to the books!';}
+
+  document.getElementById('result-grade').textContent = grade;
+  document.getElementById('result-pct').textContent = `${pct}% — ${score} of ${total} correct`;
+  document.getElementById('result-msg').textContent = msg;
+  document.getElementById('result-sub').textContent = `You answered ${score} questions correctly out of ${total}.`;
+  document.getElementById('stat-correct').textContent = score;
+  document.getElementById('stat-wrong').textContent = total - score;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('progress-fill').style.width = '100%';
+
+  show('results-screen');
+}
+
+show('start-screen');
+</script>
+</body>
+</html>
